@@ -1,60 +1,67 @@
 '''
 @author: Alex Krepelka
 @contact: f4ktu4l@securethemasses.com
-'''
-__dff_module_merge_version__ = "1.0.0"
-'''
+__dff_browser_forensics_version__ = "0.0.1"
+
 from struct import unpack
 
 from api.vfs import *
 from api.module.module import *
 from api.types.libtypes import Variant, VList, VMap, Argument, Parameter, typeId
 from api.vfs.libvfs import *
-from pyQt4.QtCore import QSize, SIGNAL
-from pyQt4.QtCore import QWidget
+from PyQt4.QtCore import QSize, SIGNAL
+from PyQt4.QtGui import QWidget
 from ui.gui.utils.utils import Utils
-'''
-from firefox_forensic import firefox_forensic
-import argparse
-'''
+
+#from firefox_forensic import firefox_forensic                                                                                                                                                                      
+
 class BROWSER_FORENSICS(Script):
     def __init__(self):
-    #Module initialization goes here
-    Script.__init__(self, "browser_forensics")
+        #Module initialization goes here                                                                                                                                                                            
+        Script.__init__(self, "browser_forensics")
 
     def c_display(self):
         print('It is working!')
 
     def start(self, args):
-       # get your arguments here.
-       # Do soemthing.
-       try:
-          self.parent = args["parent"].value()
-          print "It seems to work"
-       except IndexError:
-          print "Could not get 'parent' argument."
+        # get your arguments here.                                                                                                                                                                                  
+        # Do soemthing.                                                                                                                                                                                             
+        try:
+            self.parent = args["parent"].value()
+            print("It seems to work")
+        except IndexError:
+                print("Could not get 'parent' argument.")
 
 
 class browser_forensics(Module):
-  def __init__(self):
-    Module.__init__(self, "browser_forensics", BROWSER_FORENSICS)
+    def __init__(self):
+        Module.__init__(self, "browser_forensics", Browser_Forensics)
 
-    # Add your argument and tags here
-    self.conf.addArgument({"input": Argument.Required|Argument.Single|typeId.Node,
-                           "name": "file",
-                           "description": "Description of your module"})
-    self.tags = "Node" 
+    # Add your argument and tags here                                                                                                                                                                               
+        self.conf.addArgument({"input": Argument.Required|Argument.Single|typeId.Node,
+                               "name": "Firefox Profile Directory",
+                               "description": "Location of your Firefox profile directory.",
+                               })
+        self.tags = "Node"
 
-'''
-if __name__ == '__main__':
-    
-    parser = argparse.ArgumentParser(description='Forensix')
-    parser.add_argument('firefox_path', metavar='path',
-                        help="The path to your firefox profile.")
-    #parser.add_argument('')
-    args = parser.parse_args()
-    
-    
+
+
+class Browser_Forensics(mfso):
+
+    def __init__(self):
+        mfso.__init__(self, "browser_forensics")
+        self.name = "browser_forensics"
+        self.__disown__()
+        print("MFSO is working!")
+
+    def start(self,args):
+        print("It is working!")
+
+
+class Browser_Forensics_Node(Node):
+    def __init__(self, name, size, parent, mfso, firefox_profile_dir):
+        Node.__init__(self, name, size, parent, mfso)
+        print("Node is working!")
     
     f = firefox_forensic(args.firefox_path)
     '''
