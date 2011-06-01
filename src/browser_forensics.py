@@ -15,10 +15,9 @@ from PyQt4.QtGui import QWidget
 from ui.gui.utils.utils import Utils
 
 from firefox_forensic import firefox_forensic                                                                                                                                                                      
-
+'''
 class BROWSER_FORENSICS(Script):
-    def __init__(self):
-        #Module initialization goes here                                                                                                                                                                            
+    def __init__(self):                                                                                                                                                                           
         Script.__init__(self, "browser_forensics")
         self.vfs = vfs.vfs()
         
@@ -31,23 +30,25 @@ class BROWSER_FORENSICS(Script):
             v.getnode(args['profiledir'])
         except IndexError:
                 print("Could not find " + args['profiledir'] +  "!")
-    
+                
         print("It is working!")
+        try:
+            v.getnode
         f = firefox_forensic(args['profiledir'].value())
         print('\n\nGetting facebook\n\n')
         f.get_facebook(args['profiledir'] + 'places.sqlite')
     
 #    def browser_forensics
 
-
+'''
 class browser_forensics(Module):
     def __init__(self):
-        Module.__init__(self, "browser_forensics", BROWSER_FORENSICS)                                                                                                                                                                             
-        self.conf.addArgument({"input": Argument.Required|Argument.Single|typeId.String,
+        Module.__init__(self, "browser_forensics", Browser_Forensics)                                                                                                                                                                             
+        self.conf.addArgument({"input": Argument.Required|Argument.Single|typeId.Node,
                                "name": "profiledir",
                                "description": "Location of your Firefox profile directory."
                                })
-        self.conf.addArgument({"input": Argument.Required|Argument.Single|typeId.String,
+        self.conf.addArgument({"input": Argument.Required|Argument.List|typeId.String,
                                "name": "browser",
                                "description": "Name of browser to analyze",
                                "parameters" : { "type" : Parameter.NotEditable,
@@ -57,16 +58,28 @@ class browser_forensics(Module):
 
 
 
-'''class Browser_Forensics(mfso):
+class Browser_Forensics(mfso):
 
     def __init__(self):
         mfso.__init__(self, "browser_forensics")
         self.name = "browser_forensics"
         self.__disown__()
-        print("MFSO is working!")
 
-    def start(self,args):
-'''
+    def start(self, args):                                                                                                                                                                                             
+        v = self.vfs()
+        '''
+        try:
+            v.getnode(args['profiledir'])
+        except IndexError:
+                print("Could not find " + args['profiledir'] +  "!")
+                
+        print("It is working!")
+        '''
+        f = firefox_forensic(v.getnode(args['profiledir'].value()+ 'places.sqlite'))
+        print('\n\nGetting facebook\n\n')
+        f.get_facebook(args['profiledir'] + 'places.sqlite')
+    
+#    def browser_forensics
 
 
 class Browser_Forensics_Node(Node):
