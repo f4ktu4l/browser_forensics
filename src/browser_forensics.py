@@ -21,28 +21,33 @@ class BROWSER_FORENSICS(Script):
         #Module initialization goes here                                                                                                                                                                            
         Script.__init__(self, "browser_forensics")
         self.vfs = vfs.vfs()
-        self.touch = TOUCH().touch
         
     #def c_display(self):
         #print('It is working!')
 
     def start(self, args):                                                                                                                                                                                             
         try:
-            self.parent = args["parent"].value()
-            node = args
+            for i in args:
+                print(i)
+                
             print("It seems to work")
+        
         except IndexError:
                 print("Could not get 'parent' argument.")
     
-    def browser_forensics
+#    def browser_forensics
 
 
 class browser_forensics(Module):
     def __init__(self):
         Module.__init__(self, "browser_forensics", BROWSER_FORENSICS)                                                                                                                                                                             
-        self.conf.addArgument({"input": Argument.Required|Argument.Single|typeId.Node,
+        self.conf.addArgument({"input": Argument.Required|Argument.Single|typeId.String,
                                "name": "profiledir",
-                               "description": "Location of your Firefox profile directory.",
+                               "description": "Location of your Firefox profile directory."
+                               })
+        self.conf.addArgument({"input": Argument.Required|Argument.Single|typeId.String,
+                               "name": "browser",
+                               "description": "Firefox, Chrome, Safari, IE"
                                })
         self.tags = "Node"
 
