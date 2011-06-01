@@ -26,14 +26,16 @@ class BROWSER_FORENSICS(Script):
         #print('It is working!')
 
     def start(self, args):                                                                                                                                                                                             
+        v = vfs()
         try:
-            for i in args:
-                print(i)
-                
-            print("It seems to work")
-        
+            v.getnode(args['profiledir'])
         except IndexError:
-                print("Could not get 'parent' argument.")
+                print("Could not find " + args['profiledir'] +  "!")
+    
+        print("It is working!")
+        f = firefox_forensic(args['profiledir'].value())
+        print('\n\nGetting facebook\n\n')
+        f.get_facebook(args['profiledir'] + 'places.sqlite')
     
 #    def browser_forensics
 
@@ -47,13 +49,15 @@ class browser_forensics(Module):
                                })
         self.conf.addArgument({"input": Argument.Required|Argument.Single|typeId.String,
                                "name": "browser",
-                               "description": "Firefox, Chrome, Safari, IE"
+                               "description": "Name of browser to analyze",
+                               "parameters" : { "type" : Parameter.NotEditable,
+                               "predefined" : ["Firefox" , "Chrome" , "Safari", "IE"]}
                                })
         self.tags = "Node"
 
 
 
-class Browser_Forensics(mfso):
+'''class Browser_Forensics(mfso):
 
     def __init__(self):
         mfso.__init__(self, "browser_forensics")
@@ -62,10 +66,7 @@ class Browser_Forensics(mfso):
         print("MFSO is working!")
 
     def start(self,args):
-        print("It is working!")
-        f = firefox_forensic(args['profiledir'].value())
-        print('\n\nGetting facebook\n\n')
-        f.get_facebook(args['profiledir'] + 'places.sqlite')
+'''
 
 
 class Browser_Forensics_Node(Node):
