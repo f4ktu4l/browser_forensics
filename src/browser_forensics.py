@@ -15,48 +15,27 @@ from PyQt4.QtGui import QWidget
 from ui.gui.utils.utils import Utils
 
 from firefox_forensic import firefox_forensic                                                                                                                                                                      
-'''
-class BROWSER_FORENSICS(Script):
-    def __init__(self):                                                                                                                                                                           
-        Script.__init__(self, "browser_forensics")
-        self.vfs = vfs.vfs()
-        
-    #def c_display(self):
-        #print('It is working!')
 
-    def start(self, args):                                                                                                                                                                                             
-        v = vfs()
-        try:
-            v.getnode(args['profiledir'])
-        except IndexError:
-                print("Could not find " + args['profiledir'] +  "!")
-                
-        print("It is working!")
-        try:
-            v.getnode
-        f = firefox_forensic(args['profiledir'].value())
-        print('\n\nGetting facebook\n\n')
-        f.get_facebook(args['profiledir'] + 'places.sqlite')
-    
-#    def browser_forensics
-
-'''
 class browser_forensics(Module):
     def __init__(self):
         Module.__init__(self, "browser_forensics", Browser_Forensics)                                                                                                                                                                             
-        self.conf.addArgument({"input": Argument.Required|Argument.Single|typeId.Node,
+        self.conf.addArgument({"input": Argument.Optional|Argument.Single|typeId.Node,
                                "name": "profiledir",
-                               "description": "Location of your Firefox profile directory."
+                               "description": "Location of your browser's profile directory."
                                })
-        self.conf.addArgument({"input": Argument.Required|Argument.List|typeId.String,
-                               "name": "browser",
+        self.conf.addArgument({"input" : Argument.Required|Argument.List|typeId.String,
+                               "name" : "browser",
                                "description": "Name of browser to analyze",
                                "parameters" : { "type" : Parameter.NotEditable,
-                               "predefined" : ["Firefox" , "Chrome" , "Safari", "IE"]}
+                               "predefined" : ["firefox" , "chrome" , "safari", "ie"]}
                                })
-        self.tags = "Node"
-
-
+        self.conf.addArgument({"input" : Argument.Required|Argument.List|typeId.String,
+                               "name" : "extract",
+                               "description" : "Type of data to extract from browser.",
+                               "parameters" : {"type" : Parameter.NotEditable,
+                               "predefined" : ["history", "cookies", "signons", "downloads", "formhistory", "cache", "all"]}
+                               })
+        self.tags = "Browser"
 
 class Browser_Forensics(mfso):
 
@@ -66,7 +45,8 @@ class Browser_Forensics(mfso):
         self.__disown__()
 
     def start(self, args):                                                                                                                                                                                             
-        v = self.vfs()
+        self.vfs = vfs.vfs()
+        root = Node("firefox", 0, None, mfso)
         '''
         try:
             v.getnode(args['profiledir'])
@@ -75,17 +55,206 @@ class Browser_Forensics(mfso):
                 
         print("It is working!")
         '''
-        f = firefox_forensic(v.getnode(args['profiledir'].value()+ 'places.sqlite'))
-        print('\n\nGetting facebook\n\n')
-        f.get_facebook(args['profiledir'] + 'places.sqlite')
-    
-#    def browser_forensics
+        
+        #places = args['profiledir'] + 'places.sqlite'
+        if(str(args['browser']) == '[firefox]'):
+            f = firefox_forensic()
+            
+            
+            if(str(args['extract']) == '[history]'):
+                historyNode = Node("History", 0, root, mfso)
+                output = f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/places.sqlite')
+                
+                if(len(output) == 4):
+                    
+                    for line in output:
+                        BrowserNode(output('visited'), 0, history, mfso)
+                    
+            
+            elif(str(args['extract']) == '[cookies]'):
+                output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[signons]'):
+                output = f.get_signons('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/signons.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            elif(str(args['extract']) == '[downloads]'):
+                output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[formhistory]'):
+                output = f.get_form_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[cache]'):
+                output = f.get_cache('/media/be036205-1329-4a4c-b2eb-8bff8ed32a11/home/alex/.mozilla/firefox/vkuuxfit.default/Cache/')
+                
+            
+            else :
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/places.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/signons.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
+        
+        elif(str(args['browser']) == 'chrome'):
+            pass
+            '''    
+            if(str(args['extract']) == '[history]'):
+                output = f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/places.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[cookies]'):
+                output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[signons]'):
+                output = f.get_signons('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/signons.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            elif(str(args['extract']) == '[downloads]'):
+                output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[formhistory]'):
+                output = f.get_form_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            else :
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/places.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/signons.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
+            '''
+        
+        elif(str(args['browser']) == 'safari'):
+            pass
+            ''' 
+            if(str(args['extract']) == '[history]'):
+                output = f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/places.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[cookies]'):
+                output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[signons]'):
+                output = f.get_signons('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/signons.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            elif(str(args['extract']) == '[downloads]'):
+                output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[formhistory]'):
+                output = f.get_form_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            else :
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/places.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/signons.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
+                '''
+        elif(str(args['browser']) == 'ie') :
+            pass
+        
+        '''
+                        
+            if(str(args['extract']) == '[history]'):
+                output = f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/places.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[cookies]'):
+                output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[signons]'):
+                output = f.get_signons('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/signons.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            elif(str(args['extract']) == '[downloads]'):
+                output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            
+            elif(str(args['extract']) == '[formhistory]'):
+                output = f.get_form_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
+                i = 0
+                while i < 20:
+                    print(output[i])
+                    i = i+1
+            else :
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/places.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/signons.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
+                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
+                '''
+        rootVfs = self.vfs.getnode('/')
+        self.registerTree(rootVfs, root)
+        
+        
+class BrowserNode(Node):
+   def __init__(self, name, size, parent, mfso):
+      Node.__init__(self, name, size, parent, mfso)
+      self.__disown__()
 
+   def _attributes(self):
+    return None
 
-class Browser_Forensics_Node(Node):
-    def __init__(self, name, size, parent, mfso, firefox_profile_dir):
-        Node.__init__(self, name, size, parent, mfso)
-        print("Node is working!")
+   def fileMapping(self, fm):
+    pass
  
 #    f = firefox_forensic(args.firefox_path)
     '''
