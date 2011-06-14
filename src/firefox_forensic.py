@@ -47,38 +47,22 @@ class firefox_forensic(object):
         history_container = []
         
         for row in c:
-            if(sort_method == 'count'):
                 temp = str(row[2]),row[0],row[1],str(row[3]),row[4]
                 sorted.append(temp)
-            elif(sort_method == 'date'):
-                temp = row[4],row[0],row[1],str(row[3]),str(row[2])
-                sorted.append(temp)
-        
+            
         sorted.sort()
         sorted.reverse()
 
         for i in sorted:
-                if(sort_method == 'count'):
-                    if(i[4] != None):
-                        
-                        temp = {'visited' : i[2].encode('utf-8') , 'typed' : i[3] ,'visits' : + i[0], 'last_visit' : str(datetime.datetime.fromtimestamp(i[4]/1e6))}
+            if(i[4] != None):
+                temp = {'name' : i[1].encode('utf-8'),'url' : i[2].encode('utf-8') , 'typed' : i[3] , 'visits' : i[0], 'last_visit' : str(datetime.datetime.fromtimestamp(i[4]/1e6))}
                     
-                    else:
-                        
-                        temp = {'visited' : i[2].encode('utf-8') , 'typed' : i[3] ,'visits' : + i[0]}
+            else:
+                
+                temp = {'name' : i[1].encode('utf-8'), 'url' : i[2].encode('utf-8') , 'typed' : i[3] ,'visits' : i[0]}
                     
-                    history_container.append(temp)
-                    
-                elif(sort_method == 'date'):
-                    if(i[0] != None):
-                        
-                        temp = {'visited' : i[2].encode('utf-8') , 'typed' : i[3] ,'visits' : + i[4], 'last_visit' : str(datetime.datetime.fromtimestamp(i[0]/1e6))}
-                    
-                    else:
-                        
-                        temp = {'visited' : i[2].encode('utf-8') , 'typed' : i[3] ,'visits' : + i[4]}
-                    
-                    history_container.append(temp)
+            history_container.append(temp)
+            
         c.close()
         return history_container
     
