@@ -17,10 +17,7 @@ class firefox_forensic(object):
         c.execute('select name,value,host,lastAccessed from moz_cookies')
         cookies_container = []
         for row in c:
-            t = row[3]
-            t /= 1e6
-            p = datetime.datetime.fromtimestamp(t)
-            temp = '\nWebsite: ' + row[2].encode('utf-8') + '\n' + row[0].encode('utf-8')  + ': '+ row[1].encode('utf-8') + '\n' + str(p)
+            temp = {'website' :  row[2].encode('utf-8'), 'name' : row[0].encode('utf-8'), 'value' : row[1].encode('utf-8'), 'lastAccessed' : row[3]}
             cookies_container.append(temp)
         c.close()
         return cookies_container
@@ -55,7 +52,7 @@ class firefox_forensic(object):
 
         for i in sorted:
             if(i[4] != None):
-                temp = {'name' : i[1].encode('utf-8'),'url' : i[2].encode('utf-8') , 'typed' : i[3] , 'visits' : i[0], 'last_visit' : str(datetime.datetime.fromtimestamp(i[4]/1e6))}
+                temp = {'name' : i[1].encode('utf-8'),'url' : i[2].encode('utf-8') , 'typed' : i[3] , 'visits' : i[0], 'last_visit' : i[4]}
                     
             else:
                 

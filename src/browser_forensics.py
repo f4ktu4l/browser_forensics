@@ -73,11 +73,11 @@ class Browser_Forensics(mfso):
                 for line in output:
                         if(len(line) == 5):
                             
-                            temp = BrowserNode(line['name'], 0, historyNode, self,line['url'],line['last_visit'])
+                            temp = BrowserNode(line['url'], 0, historyNode, self,line['visits'],line['typed'],line['last_visit'])
                                                     
                         else:
                             
-                            temp = BrowserNode(line['name'], 0, historyNode, self,line['url'])
+                            temp = BrowserNode(line['url'], 0, historyNode, self,line['visits'], line['typed'])
                                         
             elif(str(args['extract']) == '[cookies]'):
                 cookiesNode = Node("Cookies", 0, root, self)
@@ -261,30 +261,44 @@ class Browser_Forensics(mfso):
         
         
 class BrowserNode(Node):
-    def __init__(self, name, size, parent, mfso, data, timestamps = 0): # don't forget to add profile_dir
+    def __init__(self, name, size, parent, mfso, visit_count = 0, typed = 0 , timestamp = 0, data = 0): # don't forget to add profile_dir
         Node.__init__(self, name, size, parent, mfso)
-        
+
         #self.profile_dir = profile_dir
         self.data = data
-        self.timestamps = timestamps
+        #self.timestamp = timestamp
+        self.visit_count = visit_count
+        self.typed = typed
         self.__disown__()
         
     def _attributes(self):
-        #v_profile_dir = Variant(self.profile_dir())
-        v_data = Variant(self.data())
-        v_timestamps = Variant(self.timestamps())
+       
+               
+        #dt = datetime.datetime.fromtimestamp(self.timestamp/1e6)
+        #vt = VTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
         
+        
+        #v_vt = Variant(vt)
+        #v_profile_dir = Variant(self.profile_dir())
+        v_data = Variant(self.data)
+        v_visit_count = Variant(self.visit_count)
+        v_typed = Variant(self.typed)
+        
+        #v_vt.thisown = False
         #v_profile_dir.thisown = False
         v_data.thisown = False
-        v_timestamps.thisown = False
+        v_visit_count.thisown = False
+        v_typed.thisown = False
         
         attr = VMap()
         attr.thisown = False
         
+        
         #attr["profile directory"] = v_profile_dir
         attr['data'] = v_data
-        attr['accessed'] = v_timestamps
-        
+        #attr['accessed'] = v_vt
+        attr['visit count'] = v_visit_count
+        attr['typed'] = v_typed
         return attr
 
     def fileMapping(self, fm):
