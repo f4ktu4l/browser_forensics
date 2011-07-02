@@ -70,7 +70,7 @@ class firefox_forensic(object):
         downloads_container = []
         
         for row in c:
-                temp = 'Download Name: ' + row[0].encode('utf-8') + '\n' + 'URL: ' + row[1].encode('utf-8') + '\n' + 'Location: ' + row[2].encode('utf-8') + '\n' + 'Start: ' + str(datetime.datetime.fromtimestamp(row[3]/1e6)) + ' End: ' + str(datetime.datetime.fromtimestamp(row[4]/1e6)) + '\n'
+                temp = {'name' : row[0].encode('utf-8'), 'url' : row[1].encode('utf-8'),  'location' : row[2].encode('utf-8'), 'start' : str(datetime.datetime.fromtimestamp(row[3]/1e6)), 'end' : row[4]}
                 downloads_container.append(temp)
         c.close()
         return downloads_container
@@ -89,23 +89,20 @@ class firefox_forensic(object):
     def get_form_history(self,form_history):
         forms = sqlite3.connect(form_history)
         c = forms.cursor()
-        c.execute('select fieldname,value,timesUsed from moz_formhistory')
+        c.execute('select fieldname,value,timesUsed,firstUsed,lastUsed from moz_formhistory')
         sorted = []
         
         for row in c:
-            temp = str(row[2]),row[0].encode('utf-8'),row[1].encode('utf-8')
+            temp = { 'timesUsed' : str(row[2]), 'fieldname' : row[0].encode('utf-8'), 'value' : row[1].encode('utf-8'), 'lastUsed' : row[4]}
             sorted.append(temp)
-        
-        sorted.sort()    
-        sorted.reverse()
         
         return sorted
             
     def get_signons(self,signons_history):
         #f = open(keyfile,'rb')
         #print(f.read())
-        print(signons_history)
         libnss = CDLL('libnss3.so')
+        print(signons_history + 'signons.sqlite')
         if libnss.NSS_Init(signons_history) != 0:
             print('Total error dude!')
         
@@ -122,17 +119,19 @@ class firefox_forensic(object):
         signons_container = []
         
         for row in c:
-            temp = 'Website: ' + row[0] + '\n'
             username = sec_item()
             username.data = cast(c_char_p(base64.b64decode(row[3])),c_void_p)
             username.len = len(base64.b64decode(row[3]))
             libnss.PK11SDR_Decrypt(byref(username),byref(decrypted),byref(pwdata))
-            temp += 'Username: ' + string_at(decrypted.data,decrypted.len) + '\n'
+            tempuser = string_at(decrypted.data,decrypted.len) 
+            print(tempuser)
             password = sec_item()
             password.data = cast(c_char_p(base64.b64decode(row[4])),c_void_p)
             password.len = len(base64.b64decode(row[4]))
             libnss.PK11SDR_Decrypt(byref(password),byref(decrypted),byref(pwdata))
-            temp += 'Password: ' + string_at(decrypted.data, decrypted.len) + '\n'
+            temppass = string_at(decrypted.data, decrypted.len)
+            print(temppass)
+            temp = {'website' : str(row[0]), 'username' : tempuser, 'password' : temppass}
             signons_container.append(temp)
         
         c.close()

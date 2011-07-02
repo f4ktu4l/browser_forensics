@@ -8,7 +8,7 @@ from struct import unpack
 
 from api.vfs import *
 from api.module.module import *
-from api.types.libtypes import Variant, VList, VMap, Argument, Parameter, typeId
+from api.types.libtypes import Variant, VList, VMap, Argument, Parameter, typeId, vtime, TIME_UNIX
 from api.vfs.libvfs import *
 from PyQt4.QtCore import QSize, SIGNAL
 from PyQt4.QtGui import QWidget
@@ -36,7 +36,7 @@ class browser_forensics(Module):
                                "name" : "extract",
                                "description" : "Type of data to extract from browser.",
                                "parameters" : {"type" : Parameter.NotEditable,
-                               "predefined" : ["history", "cookies", "signons", "downloads", "formhistory", "cache", "all"]}
+                               "predefined" : ["history", "cookies", "signons", "downloads", "formhistory", "all"]}
                                })
         self.tags = "Browser"
 
@@ -73,11 +73,11 @@ class Browser_Forensics(mfso):
                 for line in output:
                         if(len(line) == 5):
                             
-                            temp = BrowserNode(line['url'], 0, historyNode, self,line['visits'],line['typed'],line['last_visit'])
+                            temp = BrowserNode(line['url'], 0, historyNode, self, 'firefox', 'history', line['last_visit'], line['visits'],line['typed'])
                                                     
                         else:
                             
-                            temp = BrowserNode(line['url'], 0, historyNode, self,line['visits'], line['typed'])
+                            temp = BrowserNode(line['url'], 0, historyNode, self,'firefox', 'history', 0, line['visits'], line['typed'])
                                         
             elif(str(args['extract']) == '[cookies]'):
                 cookiesNode = Node("Cookies", 0, root, self)
@@ -85,42 +85,83 @@ class Browser_Forensics(mfso):
                 output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
                 
                 for line in output:
-                    temp = BrowserNode(line['website'], 0, cookiesNode,self)
+                    temp = BrowserNode(line['website'], 0, cookiesNode, self,'firefox', 'cookies', line['lastAccessed'], 0, 0, line['name'], line['value'] )
             
             elif(str(args['extract']) == '[signons]'):
                 signonsNode = Node("Signons", 0, root, self)
                 signonsNode.__disown__()
-                output = f.get_signons('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/signons.sqlite')
+                output = f.get_signons('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/')
                
                 for line in output:
-                    
-                    temp = BrowserNode(line['hostname'], 0, signonsNode, self)
+                    temp = BrowserNode(line['website'], 0, signonsNode, self, 'firefox', 'signons', 0, 0, 0, line['username'], line['password'])
                     
                     
             elif(str(args['extract']) == '[downloads]'):
-                output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
-                i = 0
-                while i < 20:
-                    print(output[i])
-                    i = i+1
+                downloadsNode = Node("Downloads", 0 , root, self)
+                downloadsNode.__disown__()
+                output = f.get_downloads('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
+                
+                for line in output:
+                    temp = BrowserNode(line['name'], 0, downloadsNode, self,'firefox', 'downloads', line['end'], 0, 0, line['url'],line['location'], line['start'])
             
             elif(str(args['extract']) == '[formhistory]'):
+                formhistoryNode = Node("Downloads", 0 , root, self)
+                formhistoryNode.__disown__()
                 output = f.get_form_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
-                i = 0
-                while i < 20:
-                    print(output[i])
-                    i = i+1
+                
+                for line in output:
+                    temp = BrowserNode(line['fieldname'], 0, formhistoryNode, self,'firefox', 'formhistory', line['lastUsed'], 0, 0, line['value'],line['timesUsed'])
             
-            elif(str(args['extract']) == '[cache]'):
-                output = f.get_cache('/media/be036205-1329-4a4c-b2eb-8bff8ed32a11/home/alex/.mozilla/firefox/vkuuxfit.default/Cache/')
                 
             
-            else :
-                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/places.sqlite')
-                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
-                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/signons.sqlite')
-                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
-                f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
+            elif(str(args['extract']) == '[all]') :
+
+                historyNode = Node("History", 0, root, self)
+                historyNode.__disown__()
+                output = f.get_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/places.sqlite')
+                                 
+                for line in output:
+                        if(len(line) == 5):
+                            
+                            temp = BrowserNode(line['url'], 0, historyNode, self, 'firefox', 'history', line['last_visit'], line['visits'],line['typed'])
+                                                    
+                        else:
+                            
+                            temp = BrowserNode(line['url'], 0, historyNode, self,'firefox', 'history', 0, line['visits'], line['typed'])
+                                        
+
+                cookiesNode = Node("Cookies", 0, root, self)
+                cookiesNode.__disown__()
+                output = f.get_cookies('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/cookies.sqlite')
+                
+                for line in output:
+                    temp = BrowserNode(line['website'], 0, cookiesNode, self,'firefox', 'cookies', line['lastAccessed'], 0, 0, line['name'], line['value'] )
+            
+
+                signonsNode = Node("Signons", 0, root, self)
+                signonsNode.__disown__()
+                output = f.get_signons('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/')
+               
+                for line in output:
+                    temp = BrowserNode(line['website'], 0, signonsNode, self, 'firefox', 'signons', 0, 0, 0, line['username'], line['password'])
+                    
+                    
+
+                downloadsNode = Node("Downloads", 0 , root, self)
+                downloadsNode.__disown__()
+                output = f.get_downloads('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/downloads.sqlite')
+                
+                for line in output:
+                    temp = BrowserNode(line['name'], 0, downloadsNode, self,'firefox', 'downloads', line['end'], 0, 0, line['url'],line['location'], line['start'])
+            
+
+                formhistoryNode = Node("Form History", 0 , root, self)
+                formhistoryNode.__disown__()
+                output = f.get_form_history('/media/A056644956642270/Users/Alex/AppData/Roaming/Mozilla/Firefox/Profiles/dy3zdv2o.default/formhistory.sqlite')
+                
+                for line in output:
+                    temp = BrowserNode(line['fieldname'], 0, formhistoryNode, self,'firefox', 'formhistory', line['lastUsed'], 0, 0, line['value'],line['timesUsed'])
+            
         
         elif(str(args['browser']) == 'chrome'):
             pass
@@ -261,45 +302,80 @@ class Browser_Forensics(mfso):
         
         
 class BrowserNode(Node):
-    def __init__(self, name, size, parent, mfso, visit_count = 0, typed = 0 , timestamp = 0, data = 0): # don't forget to add profile_dir
+    def __init__(self, name, size, parent, mfso, browser, extract, timestamp = 0, data = 0, data1 = 0 , data2 = 0, data3 = 0, data4 = 0): # don't forget to add profile_dir
         Node.__init__(self, name, size, parent, mfso)
 
         #self.profile_dir = profile_dir
         self.data = data
-        #self.timestamp = timestamp
-        self.visit_count = visit_count
-        self.typed = typed
+        self.data1 = data1
+        self.data2 = data2
+        self.data3 = data3
+        self.data4 = data4
+        self.timestamp = long(timestamp)
+        self.extract = extract
+        self.browser = browser
         self.__disown__()
         
+        
+        
     def _attributes(self):
-       
-               
-        #dt = datetime.datetime.fromtimestamp(self.timestamp/1e6)
-        #vt = VTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
         
+        vt = vtime(long(self.timestamp/1e6), TIME_UNIX)
+        vt.thisown = False
         
-        #v_vt = Variant(vt)
+        v_vt = Variant(vt)
         #v_profile_dir = Variant(self.profile_dir())
         v_data = Variant(self.data)
-        v_visit_count = Variant(self.visit_count)
-        v_typed = Variant(self.typed)
-        
-        #v_vt.thisown = False
+        v_data1 = Variant(self.data1)
+        v_data2 = Variant(self.data2)
+        v_data3 = Variant(self.data3)
+        v_data4 = Variant(self.data4)
+                
+        v_vt.thisown = False
         #v_profile_dir.thisown = False
         v_data.thisown = False
-        v_visit_count.thisown = False
-        v_typed.thisown = False
+        v_data1.thisown = False
+        v_data2.thisown = False
+        v_data3.thisown = False
+        v_data4.thisown = False
         
         attr = VMap()
         attr.thisown = False
         
         
         #attr["profile directory"] = v_profile_dir
-        attr['data'] = v_data
-        #attr['accessed'] = v_vt
-        attr['visit count'] = v_visit_count
-        attr['typed'] = v_typed
-        return attr
-
+        if (self.browser == 'firefox'):
+            
+            if(self.extract == 'history'):
+                attr['accessed'] = v_vt
+                attr['visit count'] = v_data
+                attr['typed'] = v_data1
+                return attr
+            
+            elif(self.extract == 'cookies'):
+                attr['name'] = v_data2
+                attr['cookie'] = v_data3
+                attr['accessed'] = v_vt
+                return attr
+            
+            elif(self.extract == 'downloads'):
+                attr['url'] = v_data2
+                attr['location'] = v_data3
+                #attr['start'] = v_data2
+                attr['finished'] = v_vt
+                return attr
+            
+            elif(self.extract == 'signons'):
+                attr['username'] = v_data2
+                attr['password'] = v_data3
+                return attr
+            
+            elif(self.extract == 'formhistory'):
+                attr['input'] = v_data2
+                attr['times used'] = v_data3
+                attr['last used'] = v_vt
+                return attr
+            
+                
     def fileMapping(self, fm):
         pass
